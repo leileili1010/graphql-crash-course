@@ -46,6 +46,72 @@ Query {
 # REST
 GET /courses
 ```
+
+## How to make a query from the front end?
+
+```GraphQL
+query ReviewsQuery{ # query name
+  reviews { # resource
+    rating, # field
+    content, 
+    id, 
+    author { # nested resource
+      name, # nested field
+      id,
+      verified
+    }
+  }
+}
+```
+Reviews and Authors are two resources but we only need to make one query for the nested data.
+
+![alt text](image.png)
+
+
+```GraphQL
+Query {
+  game(id: "2") {
+    title,
+    review {
+        rating,
+        author {
+            name
+        }
+    }
+  }
+}
+```
+![alt text](image-1.png)
+
+
+One query for nested data from 3 different resources
+
+```GraphQL
+query ReviewsQuery{ # query name
+  reviews { # resource
+    rating, # field
+    content, 
+    id, 
+    author { # nested resource
+      name, # nested field
+      id,
+      verified,
+      reviews {
+        rating,
+        id,
+        game {
+          title
+        }
+      }
+    }
+    game {
+      title,
+      platform
+    }
+  }
+}
+```
+
 ## What is a Schema?
 
 A **schema** is a collection of **types** that define the shape of your data.   

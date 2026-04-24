@@ -1,0 +1,22 @@
+{
+  "name": "graphql-crash-course",
+  "version": "1.0.0",
+  "description": "All the course files for the GraphQL Crash Course on the Net Ninja YouTube channel &amp; on Net Ninja Pro.",
+  "main": "index.js",
+  "scripts": {
+    "compile": "tsc",
+    "start": "npm run compile && node ./dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@apollo/server": "^5.5.0",
+    "graphql": "^16.13.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.3"
+  }
+}

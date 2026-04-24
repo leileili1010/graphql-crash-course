@@ -42,15 +42,27 @@ export const typeDefs = `#graphql
   }
 
   type Mutation {
+    addGame(game: AddGameInput!): Game
     deleteGame(id: ID!): [Game]
-    # addGame(title: String!, platform: [String!]!): Game
-    # updateGame(id: ID!, title: String!, platform: [String!]!): Game
+    updateGame(id: ID!, edits: UpdateGameInput!): Game
     # deleteAuthor(id: ID!): [Author]
     # addAuthor(name: String!, verified: Boolean!): Author
     # updateAuthor(id: ID!, name: String!, verified: Boolean!): Author
     # deleteReview(id: ID!): [Review]
     # addReview(rating: Int!, content: String!, game_id: ID!, author_id: ID!): Review
     # updateReview(id: ID!, rating: Int!, content: String!, game_id: ID!, author_id: ID!): Review
+  }
+
+  # input type is used to pass data to a mutation
+  # input is a collection of field  
+  input AddGameInput {
+    title: String!
+    platform: [String!]!
+  }
+
+  input UpdateGameInput {
+    title: String
+    platform: [String!]
   }
 `;
 

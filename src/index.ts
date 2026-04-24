@@ -35,6 +35,23 @@ const resolvers = {
 
   // 3. Mutation resolvers
   Mutation: {
+    addGame: (_: any, args: { game: { title: string; platform: string[] } }) => {
+      const game = {
+        ...args.game,
+        id: (db.games.length + 1).toString(),
+      };
+      db.games.push(game);
+      return game;
+    },
+    updateGame: (_: any, args: { id: string; edits: { title: string; platform: string[] } }) => {
+      db.games = db.games.map((game) => {
+        if (game.id === args.id) {
+          return { ...game, ...args.edits };
+        }
+        return game;
+      });
+      return db.games.find((game) => game.id === args.id);
+    },
     deleteGame: (_: any, args: { id: string }) => {
       db.games = db.games.filter((game) => game.id !== args.id);
       return db.games;

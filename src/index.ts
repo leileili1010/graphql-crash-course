@@ -1,15 +1,54 @@
-import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
-import { typeDefs } from './schema.js';
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
+import db from "./_db.js"; // db
+import { typeDefs } from "./schema.js"; // types
+
+// resolvers
+const resolvers = {
+  // 1. Root resolvers（入口）
+  // inside query are entry points to the graph
+  Query: {
+    reviews: () => db.reviews,
+    games: () => db.games,
+    authors: () => db.authors,
+    review: (_: any, args: { id: string }) =>
+      db.reviews.find((review) => review.id === args.id),
+    game: (_: any, args: { id: string }) =>
+      db.games.find((game) => game.id === args.id),
+    author: (_: any, args: { id: string }) =>
+      db.authors.find((author) => author.id === args.id),
+  },
+
+  // 2. Field resolvers（字段解析）
+  // below are nested queries
+  Game: {
+    reviews: (parent: any) => db.reviews.filter((r) => r.game_id === parent.id),
+  },
+  Author: {
+    reviews: (parent: any) =>
+      db.reviews.filter((r) => r.author_id === parent.id),
+  },
+  Review: {
+    author: (parent: any) => db.authors.find((a) => a.id === parent.author_id),
+    game: (parent: any) => db.games.find((g) => g.id === parent.game_id),
+  },
+
+  // 3. Mutation resolvers
+  Mutation: {
+    deleteGame: (_: any, args: { id: string }) => {
+      db.games = db.games.filter((game) => game.id !== args.id);
+      return db.games;
+    },
+  },    
+};
 
 // Set up server
-
-// ApolloServer constructor requires 2 parameters: 
-    // your schema definition 
-    // and your set of resolvers
+// ApolloServer constructor requires 2 parameters:
+// your schema definition
+// and your set of resolvers
 const server = new ApolloServer({
   typeDefs,
-//   resolvers,
+  resolvers,
 });
 
 // Passing an ApolloServer instance to the `startStandaloneServer` function:

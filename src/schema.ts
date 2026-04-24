@@ -9,18 +9,24 @@ export const typeDefs = `#graphql
     id: ID! # ! means it is required, otherwise means optional, allowed to be null
     title: String!
     platform: [String!]! # [] means it is a list, ! means it is required to have an array, and inside array can't be null
+    reviews: [Review!] # optional but it cannot be an array of nulls
   }
 
   type Review {
     id: ID!
     rating: Int!
     content: String!
+    game_id: ID!
+    author_id: ID!
+    game: Game!
+    author: Author!
   }
 
   type Author {
     id: ID!
     name: String!
     verified: Boolean!
+    reviews: [Review!] # optional but it cannot be an array of nulls  
   }
 
   # The "Query" type is special: it lists all of the available queries that
@@ -30,11 +36,22 @@ export const typeDefs = `#graphql
     reviews: [Review]
     games: [Game]
     authors: [Author]
+    review(id: ID!): Review # single review, id is a query variable
+    game(id: ID!): Game
+    author(id: ID!): Author
+  }
+
+  type Mutation {
+    deleteGame(id: ID!): [Game]
+    # addGame(title: String!, platform: [String!]!): Game
+    # updateGame(id: ID!, title: String!, platform: [String!]!): Game
+    # deleteAuthor(id: ID!): [Author]
+    # addAuthor(name: String!, verified: Boolean!): Author
+    # updateAuthor(id: ID!, name: String!, verified: Boolean!): Author
+    # deleteReview(id: ID!): [Review]
+    # addReview(rating: Int!, content: String!, game_id: ID!, author_id: ID!): Review
+    # updateReview(id: ID!, rating: Int!, content: String!, game_id: ID!, author_id: ID!): Review
   }
 `;
 
-// Resolvers define how to fetch the types defined in your schema.
-// Handle requests/queries based on typeDefs
-const resolvers = {
-  
-};
+

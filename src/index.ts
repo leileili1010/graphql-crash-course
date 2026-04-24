@@ -1,7 +1,22 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
+import DataLoader from "dataloader";
 import db from "./_db.js"; // db
 import { typeDefs } from "./schema.js"; // types
+
+// 0. DataLoader setup
+const createLoaders = () => ({
+  authorLoader: new DataLoader(async (authorIds: readonly string[]) => {
+    console.log("DataLoader [Authors] fetching IDs:", authorIds);
+    const authors = db.authors.filter((a) => authorIds.includes(a.id));
+    return authorIds.map((id) => authors.find((a) => a.id === id));
+  }),
+  gameLoader: new DataLoader(async (gameIds: readonly string[]) => {
+    console.log("DataLoader [Games] fetching IDs:", gameIds);
+    const games = db.games.filter((g) => gameIds.includes(g.id));
+    return gameIds.map((id) => games.find((g) => g.id === id));
+  }),
+});
 
 // resolvers
 const resolvers = {
@@ -20,7 +35,7 @@ const resolvers = {
   },
 
   // 2. Field resolvers（字段解析）
-  // below are nested queries
+  // for nested queries
   Game: {
     reviews: (parent: any) => db.reviews.filter((r) => r.game_id === parent.id),
   },
@@ -29,8 +44,10 @@ const resolvers = {
       db.reviews.filter((r) => r.author_id === parent.id),
   },
   Review: {
-    author: (parent: any) => db.authors.find((a) => a.id === parent.author_id),
-    game: (parent: any) => db.games.find((g) => g.id === parent.game_id),
+    author: (parent: any, _: any, context: any) =>
+      context.loaders.authorLoader.load(parent.author_id),
+    game: (parent: any, _: any, context: any) =>
+      context.loaders.gameLoader.load(parent.game_id),
   },
 
   // 3. Mutation resolvers
@@ -43,7 +60,10 @@ const resolvers = {
       db.games.push(game);
       return game;
     },
-    updateGame: (_: any, args: { id: string; edits: { title: string; platform: string[] } }) => {
+    updateGame: (
+      _: any,
+      args: { id: string; edits: { title: string; platform: string[] } }
+    ) => {
       db.games = db.games.map((game) => {
         if (game.id === args.id) {
           return { ...game, ...args.edits };
@@ -56,7 +76,7 @@ const resolvers = {
       db.games = db.games.filter((game) => game.id !== args.id);
       return db.games;
     },
-  },    
+  },
 };
 
 // Set up server
@@ -74,6 +94,9 @@ const server = new ApolloServer({
 //  3. prepares your app to handle incoming requests
 const { url } = await startStandaloneServer(server, {
   listen: { port: 4000 },
+  context: async () => ({
+    loaders: createLoaders(),
+  }),
 });
 
 console.log(`🚀  Server ready at: ${url}`);
